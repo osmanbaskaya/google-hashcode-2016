@@ -3,10 +3,7 @@ from collections import defaultdict as dd, Counter
 import numpy as np
 
 
-input_file = sys.argv[1]
-
-
-def read_data():
+def read_data(input_file):
     f = open(input_file)
     simulation_parameters = f.readline().split()
     r, c, d, sim_deadline, drone_load = map(int, simulation_parameters)
@@ -33,8 +30,6 @@ def read_data():
     return simulation_parameters, weights, warehouse_info, order_info, order_location_matrix
 
 
-
-
 if __name__ == '__main__':
-    read_data()
+    print read_data(sys.argv[1])
 
