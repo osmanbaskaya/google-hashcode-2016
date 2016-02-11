@@ -1,4 +1,4 @@
-from drone import Drone
+from drone import DeliveryDrone, AssistantDrone
 from warehouse import Warehouse
 import sys
 from data_reader import read_data
@@ -9,7 +9,9 @@ class WarehouseManager(object):
 
     def __init__(self, num_of_drones, warehouse_drone_nums, warehouse_order_ids):
         self.warehouses = WarehouseManager.create_warehouses()
-        self.drones = WarehouseManager.initialize_drones(num_of_drones, warehouse_drone_nums, self.warehouses)
+        self.delivery_drones, self.assistant_drones = WarehouseManager.initialize_drones(num_of_drones,
+                                                                                         warehouse_drone_nums,
+                                                                                         self.warehouses)
         self.assign_orders_to_warehouse(warehouse_order_ids)
 
     @staticmethod
@@ -17,13 +19,20 @@ class WarehouseManager(object):
         return [Warehouse(i, w['loc'], w['stock']) for i, w in enumerate(warehouse_info)]
 
     @staticmethod
-    def initialize_drones(self, num_of_drones, warehouse_drone_nums, warehouses):
-        drones = [Drone(i) for i in num_of_drones]
+    def initialize_drones(num_of_drones, warehouse_drone_nums, warehouses):
+        delivery_drones = []
+        assistant_drones = []
         i = 0
-        for w_id, count in warehouse_drone_nums:
-            map(lambda d: d.go(warehouses[w_id]['loc']) in drones[i:count+i])
-            i += count
-        return drones
+        for w_id, (delivery_drone_count, assistant_drone_count) in warehouse_drone_nums.iteritems():
+            ddrones = [DeliveryDrone(c) for c in xrange(i, i+delivery_drone_count)]
+            map(lambda d: d.go(warehouses[w_id]['loc']) in ddrones)
+            delivery_drones.extend(ddrones)
+            i += delivery_drone_count
+            asdrones = [AssistantDrone(c) for c in xrange(i, i+assistant_drone_count)]
+            map(lambda d: d.go(warehouses[w_id]['loc']) in asdrones)
+            assistant_drones.extend(ddrones)
+            i += assistant_drone_count
+        return delivery_drones, assistant_drones
 
     def assign_orders_to_warehouse(self, warehouse_order_ids):
         for warehouse_id, orders in warehouse_order_ids.iteritems():
