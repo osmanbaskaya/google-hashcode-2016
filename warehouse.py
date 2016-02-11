@@ -6,6 +6,7 @@ class Warehouse(object):
         self.stock = stock
 
     def assign_orders(self, orders):
+        pass
 
 
 class Order(object):
