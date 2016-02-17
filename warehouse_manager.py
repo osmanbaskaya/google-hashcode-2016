@@ -1,4 +1,5 @@
 from drone import DeliveryDrone, AssistantDrone
+from simulation import Simulation
 from warehouse import Warehouse
 import sys
 from data_reader import read_data
@@ -9,17 +10,17 @@ class WarehouseManager(object):
 
     def __init__(self, num_of_drones, warehouse_drone_nums, warehouse_order_ids, warehouse_info):
         self.warehouses = WarehouseManager.create_warehouses(warehouse_info)
-        self.delivery_drones, self.assistant_drones = WarehouseManager.initialize_drones(num_of_drones,
+        self.delivery_drones, self.assistant_drones = self.initialize_drones(num_of_drones,
                                                                                          warehouse_drone_nums,
                                                                                          self.warehouses)
         self.assign_orders_to_warehouse(warehouse_order_ids)
+        self.simulation = Simulation()
 
     @staticmethod
     def create_warehouses(warehouse_info):
         return [Warehouse(i, w['loc'], w['stock']) for i, w in enumerate(warehouse_info.values())]
 
-    @staticmethod
-    def initialize_drones(num_of_drones, warehouse_drone_nums, warehouses):
+    def initialize_drones(self, num_of_drones, warehouse_drone_nums, warehouses):
         delivery_drones = []
         assistant_drones = []
         i = 0
@@ -27,13 +28,14 @@ class WarehouseManager(object):
             delivery_drone_count = int(delivery_drone_count)
             assistant_drone_count = int(assistant_drone_count)
             ddrones = [DeliveryDrone(c) for c in xrange(i, i+delivery_drone_count)]
-            map(lambda d: d.go(warehouses[w_id].loc), ddrones)
+            map(lambda d: self.simulation.schedule_event(d.go(warehouses[w_id].loc)), ddrones)
             delivery_drones.extend(ddrones)
             i += delivery_drone_count
             asdrones = [AssistantDrone(c) for c in xrange(i, i+assistant_drone_count)]
-            map(lambda d: d.go(warehouses[w_id].loc), asdrones)
+            map(lambda d: self.simulation.schedule_event(d.go(warehouses[w_id].loc)), asdrones)
             assistant_drones.extend(ddrones)
             i += assistant_drone_count
+            # TODO: It seems like this is an error (syntactically)
             warehouses[w_id].assign_drones(ddrones, asdrones)
         return delivery_drones, assistant_drones
 
