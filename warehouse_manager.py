@@ -3,6 +3,7 @@ from simulation import Simulation
 from warehouse import Warehouse
 import sys
 from data_reader import read_data
+from collections import Counter, defaultdict as dd
 from kmeans import assign_orders_and_drones_to_warehouses
 
 
@@ -44,10 +45,27 @@ class WarehouseManager(object):
             self.warehouses[warehouse_id].assign_orders(orders)
 
     def start_delivering(self, order_info):
+        # Not Finished
         for warehouse in self.warehouses:
             for order in warehouse.orders:
                 if order in warehouse.stock:
-                    warehouse.drones.deliver
+                    pass
+
+    def transfer_remaining_orders_to_warehouses(self):
+        # find the closest warehouse pairs.
+        w2w_distances = Warehouse.calc_w2w_distances(self.warehouses)
+        orders = dd(list)
+        for w in self.warehouses:
+            for order in w.orders:
+                for product in order:
+                    # product id
+                    w1 = Warehouse.find_product_closest_warehouse(product, w2w_distances[w.id])
+                    # key: (from_warehouse, to_warehouse)
+                    orders[(w1.id, w.id)].append(product)
+
+        optimized_orders = {}
+        for k, order_list in orders.iteritems():
+            optimized_orders[k] = Counter(order_list)
 
 
 def main():
