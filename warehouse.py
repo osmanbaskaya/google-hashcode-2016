@@ -3,7 +3,7 @@ class Warehouse(object):
     def __init__(self, id, loc, stock):
         self.loc = loc
         self.id = id
-        self.stock = set(stock)
+        self.stock = stock
         self.orders = None
         self.drones = None
 
